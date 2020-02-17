@@ -1,9 +1,16 @@
 import time
+import logging
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 
-cred = credentials.Certificate("portfolio-website-340c1-firebase-adminsdk-8lff3-7442a173ef.json")
+logging.basicConfig(filename='portfolio_listener.log', filemode='w',
+                    format='%(asctime)s | %(levelname)s: %(message)s',
+                    level=logging.INFO, datefmt='%m/%d/%Y %I:%M:%S %p'
+                    )
+cred = credentials.Certificate(
+    "portfolio-website-340c1-firebase-adminsdk-8lff3-7442a173ef.json"
+    )
 firebase_admin.initialize_app(cred)
 
 db = firestore.client()
@@ -17,6 +24,11 @@ def on_snapshot(col_snapshot, changes, read_time):
         print("I got a callback")
         doc_ref = db.collection(u'users').document(u'%s' % col_snapshot[-1].id)
         doc = doc_ref.get()
+        email = doc._data.get('email')
+        name = doc._data.get('fullname')
+        message = doc._data.get('message')
+        logging.info('\nemail: %s\nsname: %s\nmessage: %s\n\n',
+                     email, name, message)
         print(u'Document data: {}'.format(doc.to_dict()))
 
 
