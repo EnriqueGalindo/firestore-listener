@@ -22,12 +22,17 @@ document_quantity = 0
 def on_snapshot(col_snapshot, changes, read_time):
     if document_quantity != len(list(col_snapshot)):
         print("I got a callback")
-        doc_ref = db.collection(u'users').document(u'%s' % col_snapshot[-1].id)
-        doc = doc_ref.get()
+        order_doc_dict = {}
+        order_doc_list = []
+        for doc in col_snapshot:
+            order_doc_dict[doc.create_time.seconds] = doc
+        for value in sorted(order_doc_dict.keys()):
+            order_doc_list.append(order_doc_dict[value])
+        doc = order_doc_list[-1]
         email = doc._data.get('email')
         name = doc._data.get('fullname')
         message = doc._data.get('message')
-        logging.info('\nemail: %s\nsname: %s\nmessage: %s\n\n',
+        logging.info('\nemail: %s\nname: %s\nmessage: %s\n\n',
                      email, name, message)
         print(u'Document data: {}'.format(doc.to_dict()))
 
